@@ -1,0 +1,10 @@
+{
+    "brokerUrls": "",
+    "topics": {
+        "aircraftCapacities": "aircraft-capacities",
+        "missingAircraftTypes": "missing-aircraft-types",
+        "rawDepartures": "raw-departures",
+        "rawArrivals": "raw-arrivals",
+        "totalPassengerCount": "total-passenger-count"
+    }
+}

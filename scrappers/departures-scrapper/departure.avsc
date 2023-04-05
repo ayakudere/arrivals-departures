@@ -1,0 +1,13 @@
+{
+	"namespace": "departures.avro",
+	"type": "record",
+	"name": "Departure",
+	"fields": [
+		{"name": "number", "type": "string"},
+		{"name": "aircraftType",  "type": "string"},
+		{"name": "arrivalIata", "type": "string"},
+        {"name": "arrivalCountry", "type": "string"},
+        {"name": "departureIata", "type": "string"},
+        {"name": "departureTime", "type": "int", "logicalType": "timestamp-millis"}
+	]
+}

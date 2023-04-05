@@ -1,0 +1,9 @@
+{
+	"namespace": "arrivalsDepartures.avro",
+	"type": "record",
+	"name": "AircraftCapacity",
+	"fields": [
+		{"name": "capacity", "type": "int"},
+		{"name": "aircraftType",  "type": "string"}
+	]
+}
