@@ -52,6 +52,7 @@ object Main extends App {
         Branched.withConsumer[K, AggregatedCapacity] { stream =>
           stream.mapValues(_.aircraftType)
             .peek((_, t) => println(t))
+            .selectKey((_, aircraftType) => aircraftType)
             .to(Kafka.Topics.missingAircraftTypes)  // TODO: На самом деле нужно еще ставить null для типов с известной capacity, чтобы они чистились из топика
         }                                           //       и, возможно, сам топик не нужен, но хотелось попробовать использовать branch для чего-нибудь
       )
