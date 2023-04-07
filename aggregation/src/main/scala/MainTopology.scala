@@ -40,7 +40,7 @@ object MainTopology {
 
     def filterDuplicateEvents[K, V <: AircraftEvent](stream: KStream[K, V])(implicit keySerde: Serde[K], valueSerde: Serde[V]): KStream[K, V] = {
       stream.groupByKey
-        .windowedBy(TimeWindows.ofSizeAndGrace(Duration.ofHours(24), Duration.ofHours(2)))
+        .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofHours(24)))
         .reduce((_, v) => v)
         .suppress(Suppressed.untilWindowCloses(BufferConfig.unbounded())) // В суточном промежутке наш кривой парсер может кидать один и тот же рейс несколько раз
         .toStream

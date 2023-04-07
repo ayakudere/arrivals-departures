@@ -1,6 +1,6 @@
 import java.sql.Timestamp
-import java.time.temporal.{TemporalAmount, TemporalUnit}
-import java.time.{Duration, Instant, LocalDateTime}
+import java.time.temporal.{ChronoField, TemporalAmount, TemporalField, TemporalUnit}
+import java.time.{Duration, Instant, LocalDateTime, ZoneId}
 
 import Config.Kafka
 import dto.AircraftCapacity.AircraftType
@@ -24,8 +24,12 @@ class TopologySpec extends AnyFunSpec with Matchers {
 
     val driver = new TopologyTestDriver(MainTopology.getTopology, MainTopology.getProps)
 
-    val arrivalsTopic = driver.createInputTopic(Kafka.Topics.rawArrivals, implicitly[Serializer[ArrivalKey]], implicitly[Serializer[Arrival]], Instant.now(), Duration.ofHours(1))
-    val departuresTopic = driver.createInputTopic(Kafka.Topics.rawDepartures, implicitly[Serializer[DepartureKey]], implicitly[Serializer[Departure]], Instant.now(), Duration.ofHours(1))
+    val now = LocalDateTime.now()
+    val timestamp = Timestamp.valueOf(now)
+    val processingStart = now.atZone(ZoneId.systemDefault()).toInstant
+
+    val arrivalsTopic = driver.createInputTopic(Kafka.Topics.rawArrivals, implicitly[Serializer[ArrivalKey]], implicitly[Serializer[Arrival]], processingStart, Duration.ofMinutes(1))
+    val departuresTopic = driver.createInputTopic(Kafka.Topics.rawDepartures, implicitly[Serializer[DepartureKey]], implicitly[Serializer[Departure]], processingStart, Duration.ofMinutes(1))
     val capacitiesTopic = driver.createInputTopic(Kafka.Topics.aircraftCapacities, implicitly[Serializer[AircraftType]], implicitly[Serializer[AircraftCapacity]])
     val missingTypesTopic = driver.createOutputTopic(Kafka.Topics.missingAircraftTypes, implicitly[Deserializer[AircraftType]], implicitly[Deserializer[String]])
     val totalsTopic = driver.createOutputTopic(Kafka.Topics.totalPassengerCount, implicitly[Deserializer[String]], implicitly[Deserializer[Int]])
@@ -35,22 +39,20 @@ class TopologySpec extends AnyFunSpec with Matchers {
       AircraftCapacity(140, "A319")
     )
 
-    val now = Timestamp.valueOf(LocalDateTime.now())
-
     val arrivals = Seq(
-      Arrival("TK 403", "B738", "GNJ", "AZ", "LED", now),
-      Arrival("TK 403", "B738", "GNJ", "AZ", "LED", now),
-      Arrival("TK 403", "B738", "GNJ", "AZ", "LED", now),
-      Arrival("TK 403", "B738", "GNJ", "AZ", "LED", now),
-      Arrival("TK 403", "B738", "GNJ", "AZ", "LED", now),
-      Arrival("U6 288", "A319", "GNJ", "AZ", "LED", now)
+      Arrival("TK 403", "B738", "GNJ", "AZ", "LED", timestamp),
+      Arrival("TK 403", "B738", "GNJ", "AZ", "LED", timestamp),
+      Arrival("TK 403", "B738", "GNJ", "AZ", "LED", timestamp),
+      Arrival("TK 403", "B738", "GNJ", "AZ", "LED", timestamp),
+      Arrival("TK 403", "B738", "GNJ", "AZ", "LED", timestamp),
+      Arrival("U6 288", "A319", "GNJ", "AZ", "LED", timestamp)
     )
 
     val departures = Seq(
-      Departure("HY 633", "missing", "GNJ", "AZ", "LED", now),
-      Departure("FV 6972", "A319", "GNJ", "AZ", "LED", now),
-      Departure("PC 396", "B738", "GNJ", "AZ", "LED", now),
-      Departure("B2 939", "B738", "GNJ", "AZ", "LED", now),
+      Departure("HY 633", "missing", "GNJ", "AZ", "LED", timestamp),
+      Departure("FV 6972", "A319", "GNJ", "AZ", "LED", timestamp),
+      Departure("PC 396", "B738", "GNJ", "AZ", "LED", timestamp),
+      Departure("B2 939", "B738", "GNJ", "AZ", "LED", timestamp),
     )
 
     capacities.foreach(capacity => capacitiesTopic.pipeInput(capacity.aircraftType, capacity))
@@ -59,8 +61,8 @@ class TopologySpec extends AnyFunSpec with Matchers {
 
 
     // Чтобы протестировать дедупликацию с суточным окном
-    arrivalsTopic.pipeInput("dummy", Arrival("dummy", "dummy", "dummy", "dummy", "dummy", now), Instant.now().plus(Duration.ofHours(26)))
-    departuresTopic.pipeInput("dummy", Departure("dummy", "dummy", "dummy", "dummy", "dummy", now), Instant.now().plus(Duration.ofHours(26)))
+    arrivalsTopic.pipeInput("dummy", Arrival("dummy", "dummy", "dummy", "dummy", "dummy", timestamp), Instant.now().plus(Duration.ofHours(24)))
+    departuresTopic.pipeInput("dummy", Departure("dummy", "dummy", "dummy", "dummy", "dummy", timestamp), Instant.now().plus(Duration.ofHours(24)))
 
     val totals = totalsTopic.readKeyValuesToMap().asScala
 
