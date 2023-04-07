@@ -1,16 +1,17 @@
 import java.sql.Timestamp
 import java.time.{Duration, Instant, LocalDateTime, ZoneId}
 
-import Config.Kafka
-import dto.AircraftCapacity.AircraftType
-import dto.Arrival.ArrivalKey
-import dto.Departure.DepartureKey
-import dto._
+import config.Constants.Kafka
+import domain.AircraftCapacity.AircraftType
+import domain.Arrival.ArrivalKey
+import domain.Departure.DepartureKey
+import domain._
 import org.apache.kafka.common.serialization.{Deserializer, Serde, Serializer}
 import org.apache.kafka.streams.TopologyTestDriver
 import org.apache.kafka.streams.scala.serialization.Serdes._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import topologies.MainTopology
 
 import scala.jdk.CollectionConverters._
 
@@ -32,6 +33,9 @@ class TopologySpec extends AnyFunSpec with Matchers {
     val capacitiesTopic = driver.createInputTopic(Kafka.Topics.aircraftCapacities, implicitly[Serializer[AircraftType]], implicitly[Serializer[AircraftCapacity]])
     val missingTypesTopic = driver.createOutputTopic(Kafka.Topics.missingAircraftTypes, implicitly[Deserializer[AircraftType]], implicitly[Deserializer[String]])
     val totalsTopic = driver.createOutputTopic(Kafka.Topics.totalPassengerCount, implicitly[Deserializer[String]], implicitly[Deserializer[Int]])
+    val arrivalsByCountryTopic = driver.createOutputTopic(Kafka.Topics.arrivalsByCountry, implicitly[Deserializer[String]], implicitly[Deserializer[Int]])
+    val departuresByCountryTopic = driver.createOutputTopic(Kafka.Topics.departuresByCountry, implicitly[Deserializer[String]], implicitly[Deserializer[Int]])
+    val aircraftTypeCountsTopic = driver.createOutputTopic(Kafka.Topics.aircraftTypeCounts, implicitly[Deserializer[AircraftType]], implicitly[Deserializer[Long]])
 
     val capacities = Seq(
       AircraftCapacity(162, "B738"),
@@ -39,19 +43,19 @@ class TopologySpec extends AnyFunSpec with Matchers {
     )
 
     val arrivals = Seq(
-      Arrival("TK 403", "B738", "GNJ", "AZ", "LED", timestamp),
-      Arrival("TK 403", "B738", "GNJ", "AZ", "LED", timestamp),
-      Arrival("TK 403", "B738", "GNJ", "AZ", "LED", timestamp),
-      Arrival("TK 403", "B738", "GNJ", "AZ", "LED", timestamp),
-      Arrival("TK 403", "B738", "GNJ", "AZ", "LED", timestamp),
-      Arrival("U6 288", "A319", "GNJ", "AZ", "LED", timestamp)
+      Arrival("TK 403", "B738", "GNJ", "TK", "LED", timestamp),
+      Arrival("TK 403", "B738", "GNJ", "TK", "LED", timestamp),
+      Arrival("TK 403", "B738", "GNJ", "TK", "LED", timestamp),
+      Arrival("TK 403", "B738", "GNJ", "TK", "LED", timestamp),
+      Arrival("TK 403", "B738", "GNJ", "TK", "LED", timestamp),
+      Arrival("U6 288", "A319", "GNJ", "UK", "LED", timestamp)
     )
 
     val departures = Seq(
       Departure("HY 633", "missing", "GNJ", "AZ", "LED", timestamp),
       Departure("FV 6972", "A319", "GNJ", "AZ", "LED", timestamp),
       Departure("PC 396", "B738", "GNJ", "AZ", "LED", timestamp),
-      Departure("B2 939", "B738", "GNJ", "AZ", "LED", timestamp),
+      Departure("B2 939", "B738", "GNJ", "US", "LED", timestamp),
     )
 
     capacities.foreach(capacity => capacitiesTopic.pipeInput(capacity.aircraftType, capacity))
@@ -80,6 +84,28 @@ class TopologySpec extends AnyFunSpec with Matchers {
     it("should put missing aircraft types into a topic") {
       missingTypesTopic.getQueueSize should not be 0
       missingTypesTopic.readValue() should be("missing")
+    }
+
+
+    it("should aggregate arrivals by countries correctly") {
+      val counts = arrivalsByCountryTopic.readKeyValuesToMap().asScala
+
+      counts("TK") should be(162)
+      counts("UK") should be(140)
+    }
+
+    it("should aggregate departures by countries correctly") {
+      val counts = departuresByCountryTopic.readKeyValuesToMap().asScala
+
+      counts("AZ") should be(302)
+      counts("US") should be(162)
+    }
+
+    it("should count aircraft types correctly") {
+      val counts = aircraftTypeCountsTopic.readKeyValuesToMap().asScala
+
+      counts("B738") should be(3)
+      counts("A319") should be(2)
     }
 
     driver.close()

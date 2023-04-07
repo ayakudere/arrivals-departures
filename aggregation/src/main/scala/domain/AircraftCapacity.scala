@@ -1,7 +1,7 @@
-package dto
+package domain
 
 import com.sksamuel.avro4s.kafka.GenericSerde
-import dto.AircraftCapacity.AircraftType
+import domain.AircraftCapacity.AircraftType
 
 case class AircraftCapacity(capacity: Int, aircraftType: AircraftType)
 
