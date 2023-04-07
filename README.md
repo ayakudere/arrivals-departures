@@ -11,7 +11,7 @@
 <details>
   <summary>Картинка с топологией</summary>
   
-  ![canvas](https://user-images.githubusercontent.com/1942903/230223439-08a473e9-c6de-4377-a710-097aeda016b8.png)
+  ![canvas](https://user-images.githubusercontent.com/1942903/230631377-77eb0fd0-cdf9-468d-8c1b-d5c6c77e9f79.png)
 </details>
 
 Топики:
@@ -20,12 +20,14 @@
 2. aircraft-capacities - "таблица" со средним числом пассажиров по типу самолёта (для загрузки в GlobalKTable)
 3. missing-aircraft-types - список кодов ICAO, для которых вместимость пока не определена
 4. total-passenger-count - топик с проагрегированными значениями общего числа пассажиров с отдельными ключами для вылетов и прилётов
+5. departures-by-country - общее число пасажиров по странам назначения для вылетов
+6. arrivals-by-country - общее число пассажиров по странам отправления для прилётов
+7. aircraft-type-counts - подсчет типов самолётов для вылетов и прилётов
 
 Все топики c `cleanup.policy=compact`
 
 ## TODO
 
 1. Фронтенд
-2. Тесты
 3. Разместить всё в докере/кубере
 4. Больше скрапперов
