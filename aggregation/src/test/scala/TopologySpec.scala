@@ -1,5 +1,4 @@
 import java.sql.Timestamp
-import java.time.temporal.{ChronoField, TemporalAmount, TemporalField, TemporalUnit}
 import java.time.{Duration, Instant, LocalDateTime, ZoneId}
 
 import Config.Kafka
@@ -79,6 +78,7 @@ class TopologySpec extends AnyFunSpec with Matchers {
     }
 
     it("should put missing aircraft types into a topic") {
+      missingTypesTopic.getQueueSize should not be 0
       missingTypesTopic.readValue() should be("missing")
     }
 
