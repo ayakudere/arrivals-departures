@@ -31,6 +31,7 @@ class TopologySpec extends AnyFunSpec with Matchers {
     val arrivalsTopic = driver.createInputTopic(Kafka.Topics.rawArrivals, implicitly[Serializer[ArrivalKey]], implicitly[Serializer[Arrival]], processingStart, Duration.ofMinutes(1))
     val departuresTopic = driver.createInputTopic(Kafka.Topics.rawDepartures, implicitly[Serializer[DepartureKey]], implicitly[Serializer[Departure]], processingStart, Duration.ofMinutes(1))
     val capacitiesTopic = driver.createInputTopic(Kafka.Topics.aircraftCapacities, implicitly[Serializer[AircraftType]], implicitly[Serializer[AircraftCapacity]])
+
     val missingTypesTopic = driver.createOutputTopic(Kafka.Topics.missingAircraftTypes, implicitly[Deserializer[AircraftType]], implicitly[Deserializer[String]])
     val totalsTopic = driver.createOutputTopic(Kafka.Topics.totalPassengerCount, implicitly[Deserializer[String]], implicitly[Deserializer[Int]])
     val arrivalsByCountryTopic = driver.createOutputTopic(Kafka.Topics.arrivalsByCountry, implicitly[Deserializer[String]], implicitly[Deserializer[Int]])
