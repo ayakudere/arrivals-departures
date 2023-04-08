@@ -1,8 +1,9 @@
 package domain
 
 import com.sksamuel.avro4s.kafka.GenericSerde
+import domain.AircraftCapacity.AircraftType
 
-case class AggregatedCapacity(aircraftType: String, capacity: Option[Int], country: String, airportIata: String)
+case class AggregatedCapacity(aircraftType: AircraftType, capacity: Option[Int], country: String, airportIata: String)
 
 object AggregatedCapacity {
   implicit val serde: GenericSerde[AggregatedCapacity] = new GenericSerde[AggregatedCapacity]

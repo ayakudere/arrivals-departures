@@ -8,7 +8,7 @@ object Constants {
       val totalPassengerCount = "total-passenger-count"
       val aircraftCapacities = "aircraft-capacities"
       val missingAircraftTypes = "missing-aircraft-types"
-      val arrivalsByCountry = "total-by-country"
+      val arrivalsByCountry = "arrivals-by-country"
       val departuresByCountry = "departures-by-country"
       val aircraftTypeCounts = "aircraft-type-counts"
     }

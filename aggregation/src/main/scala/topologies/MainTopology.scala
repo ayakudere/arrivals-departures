@@ -46,7 +46,7 @@ object MainTopology {
     CountryAggregation.aggregate(aggregatedArrivals).to(Kafka.Topics.arrivalsByCountry)
     CountryAggregation.aggregate(aggregatedDepartures).to(Kafka.Topics.departuresByCountry)
 
-    AircraftTypeAggregation.aggregate(aggregatedArrivals.merge(aggregatedDepartures), Kafka.Topics.aircraftTypeCounts)
+    AircraftTypeAggregation.aggregate(aggregatedArrivals.merge(aggregatedDepartures)).to(Kafka.Topics.aircraftTypeCounts)
 
     TotalsAggregation.aggregate(aggregatedArrivals, Kafka.totalArrivalsKey).to(Kafka.Topics.totalPassengerCount)
     TotalsAggregation.aggregate(aggregatedDepartures, Kafka.totalDeparturesKey).to(Kafka.Topics.totalPassengerCount)
