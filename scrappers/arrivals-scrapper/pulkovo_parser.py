@@ -2,34 +2,26 @@ import random
 import requests
 import time
 from datetime import datetime
-import airportsdata
+import sys
+sys.path.append("..")
+from common.utils import get_country_by_iata
 
 API_URL = "https://pulkovoairport.ru/api/?type=arrival"
 ARRIVED_STATUS = "Arrived"
 ARRIVAL_IATA = "LED"
-
-airports = airportsdata.load('IATA')
-
-def get_departure_country(iata):
-    if (iata == "GNJ"): # until they merge https://github.com/mwgg/Airports/pull/82
-        iata = "KVD"
-    try:
-        return airports[iata]["country"]
-    except:
-        return False
 
 def generate_response_from_row(row):
     return {
         "number": row["OA_FLIGHT_NUMBER"],
         "aircraftType": row["OA_RACT_ICAO_CODE"],
         "arrivalTime": int(datetime.fromisoformat(row["OA_ATA"]).timestamp()),
-        "departureCountry": get_departure_country(row["OA_RAP_CODE_ORIGIN"]),
+        "departureCountry": get_country_by_iata(row["OA_RAP_CODE_ORIGIN"]),
         "departureIata": row["OA_RAP_CODE_ORIGIN"],
         "arrivalIata": ARRIVAL_IATA
     }
 
 def is_international(row):
-    departure_country = get_departure_country(row["OA_RAP_CODE_ORIGIN"])
+    departure_country = get_country_by_iata(row["OA_RAP_CODE_ORIGIN"])
     return departure_country and departure_country != "RU"
 
 def get_flights():
